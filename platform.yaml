@@ -1,0 +1,18 @@
+version: 1
+app: temp
+
+deploy:
+  namespace: my-team
+  replicas: 1
+  port: 3000
+  health_path: /healthz
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 200m, memory: 256Mi }
+
+gates:
+  secret_scan: { tool: gitleaks, fail_on: any }
+  sast: { tool: semgrep, fail_on: HIGH }
+  # A static site inherits its base image's CVEs and can do nothing about them
+  # until nginx:alpine is rebuilt upstream. Recorded, not blocking.
+  image_scan: { tool: trivy, fail_on: never }
